@@ -2,6 +2,7 @@
 #define _GRAPHICS_H_
 
 #include <Windows.h>
+#include "d3dgraphics.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -21,6 +22,7 @@ public:
 
 private:
 	bool Render();
+	D3DGraphics* _d3DGraphics;
 
 };
 

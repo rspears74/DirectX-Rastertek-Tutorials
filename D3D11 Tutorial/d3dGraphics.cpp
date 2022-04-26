@@ -25,7 +25,7 @@ D3DGraphics::~D3DGraphics()
 bool D3DGraphics::Initialize(int screenWidth, int screenHeight, bool vSync, HWND hWnd, bool fullScreen, float screenDepth, float screenNear)
 {
 	HRESULT result;
-	IDXGIFactory* factory;
+	IDXGIFactory1* factory;
 	IDXGIAdapter* adapter;
 	IDXGIOutput* adapterOutput;
 	unsigned int numModes, i, numerator, denominator;
@@ -47,7 +47,7 @@ bool D3DGraphics::Initialize(int screenWidth, int screenHeight, bool vSync, HWND
 	vSyncEnabled = vSync;
 
 	//create a DirectX graphics interface factory
-	result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory);
+	result = CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)&factory);
 	if (FAILED(result)) { return false; }
 
 	//use the factory to create and adapter for the primary graphics interface (video card)
@@ -136,6 +136,26 @@ bool D3DGraphics::Initialize(int screenWidth, int screenHeight, bool vSync, HWND
 		swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
 	}
 
+	//set the usage of the back buffer
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
+	//set the handle for the window to render to
+	swapChainDesc.OutputWindow = hWnd;
+
+	//turn multisampling off
+	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SampleDesc.Quality = 0;
+
+	//set to fullscreen or windowed
+	if (fullScreen)
+	{
+		swapChainDesc.Windowed = false;
+	}
+	else
+	{
+		swapChainDesc.Windowed = true;
+	}
+
 	//set the scan line ordering and scaling to unspecified
 	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
@@ -200,9 +220,15 @@ bool D3DGraphics::Initialize(int screenWidth, int screenHeight, bool vSync, HWND
 
 	//stencil operations if pixel is front facing
 	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
 	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	//stencil operations if pixel is back facing
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
 	//create the dpeth stencil state
 	result = device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);

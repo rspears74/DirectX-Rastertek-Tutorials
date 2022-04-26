@@ -13,7 +13,7 @@ public:
 	bool IsKeyDown(unsigned int);
 
 private:
-	bool keys[256];
+	bool _keys[256];
 };
 
 #endif

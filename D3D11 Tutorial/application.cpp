@@ -2,8 +2,8 @@
 
 Application::Application()
 {
-	input = 0;
-	graphics = 0;
+	_input = 0;
+	_graphics = 0;
 }
 
 Application::Application(const Application& other)
@@ -26,19 +26,19 @@ bool Application::Initialize()
 
 	InitializeWindows(screenWidth, screenHeight);
 
-	input = new Input();
-	if (!input) {
+	_input = new Input();
+	if (!_input) {
 		return false;
 	}
 
-	input->Initialize();
+	_input->Initialize();
 
-	graphics = new Graphics();
-	if (!graphics) {
+	_graphics = new Graphics();
+	if (!_graphics) {
 		return false;
 	}
 
-	result = graphics->Initialize(screenWidth, screenHeight, hWnd);
+	result = _graphics->Initialize(screenWidth, screenHeight, _hWnd);
 	if (!result) {
 		return false;
 	}
@@ -46,15 +46,15 @@ bool Application::Initialize()
 
 void Application::Shutdown()
 {
-	if (graphics) {
-		graphics->Shutdown();
-		delete graphics;
-		graphics = 0;
+	if (_graphics) {
+		_graphics->Shutdown();
+		delete _graphics;
+		_graphics = 0;
 	}
 
-	if (input) {
-		delete input;
-		input = 0;
+	if (_input) {
+		delete _input;
+		_input = 0;
 	}
 
 	ShutdownWindows();
@@ -98,12 +98,12 @@ bool Application::Frame()
 {
 	bool result;
 
-	if (input->IsKeyDown(VK_ESCAPE))
+	if (_input->IsKeyDown(VK_ESCAPE))
 	{
 		return false;
 	}
 
-	result = graphics->Frame();
+	result = _graphics->Frame();
 	if (!result)
 	{
 		return false;
@@ -118,13 +118,13 @@ LRESULT CALLBACK Application::MessageHandler(HWND hWnd, UINT uMsg, WPARAM wParam
 	{
 		case WM_KEYDOWN:
 		{
-			input->KeyDown((unsigned int)wParam);
+			_input->KeyDown((unsigned int)wParam);
 			return 0;
 		}
 
 		case WM_KEYUP:
 		{
-			input->KeyUp((unsigned int)lParam);
+			_input->KeyUp((unsigned int)lParam);
 			return 0;
 		}
 
@@ -145,23 +145,23 @@ void Application::InitializeWindows(int& screenWidth, int& screenHeight)
 	AppHandle = this;
 
 	//get application instance
-	hInstance = GetModuleHandle(NULL);
+	_hInstance = GetModuleHandle(NULL);
 
 	//give the app a name
-	applicationName = L"Engine";
+	_applicationName = L"Engine";
 
 	//setup the windows class with default settings
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 	wc.lpfnWndProc = WndProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
-	wc.hInstance = hInstance;
+	wc.hInstance = _hInstance;
 	wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);
 	wc.hIconSm = wc.hIcon;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wc.lpszMenuName = NULL;
-	wc.lpszClassName = applicationName;
+	wc.lpszClassName = _applicationName;
 	wc.cbSize = sizeof(WNDCLASSEX);
 
 	RegisterClassEx(&wc);
@@ -198,14 +198,14 @@ void Application::InitializeWindows(int& screenWidth, int& screenHeight)
 	}
 
 	//create the window with the screen settings and get the handle to it
-	hWnd = CreateWindowEx(WS_EX_APPWINDOW, applicationName, applicationName,
+	_hWnd = CreateWindowEx(WS_EX_APPWINDOW, _applicationName, _applicationName,
 		WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP,
-		posX, posY, screenWidth, screenHeight, NULL, NULL, hInstance, NULL);
+		posX, posY, screenWidth, screenHeight, NULL, NULL, _hInstance, NULL);
 
 	//bring the window up on the screen and set it as main focus
-	ShowWindow(hWnd, SW_SHOW);
-	SetForegroundWindow(hWnd);
-	SetFocus(hWnd);
+	ShowWindow(_hWnd, SW_SHOW);
+	SetForegroundWindow(_hWnd);
+	SetFocus(_hWnd);
 
 	//hide the mouse cursor
 	ShowCursor(false);
@@ -225,12 +225,12 @@ void Application::ShutdownWindows()
 	}
 
 	//remove the window
-	DestroyWindow(hWnd);
-	hWnd = NULL;
+	DestroyWindow(_hWnd);
+	_hWnd = NULL;
 
 	//remove the application instance
-	UnregisterClass(applicationName, hInstance);
-	hInstance = NULL;
+	UnregisterClass(_applicationName, _hInstance);
+	_hInstance = NULL;
 
 	//release the pointer to the class
 	AppHandle = NULL;

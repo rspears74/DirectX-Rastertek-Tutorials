@@ -26,12 +26,12 @@ private:
 	void ShutdownWindows();
 
 private:
-	LPCWSTR applicationName;
-	HINSTANCE hInstance;
-	HWND hWnd;
+	LPCWSTR _applicationName;
+	HINSTANCE _hInstance;
+	HWND _hWnd;
 
-	Input* input;
-	Graphics* graphics;
+	Input* _input;
+	Graphics* _graphics;
 };
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

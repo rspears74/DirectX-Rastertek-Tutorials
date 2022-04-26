@@ -151,7 +151,7 @@ bool D3DGraphics::Initialize(int screenWidth, int screenHeight, bool vSync, HWND
 
 	//create the swap chain, D3D device and D3D device context
 	result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &featureLevel, 1,
-		D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &device, &deviceContext);
+		D3D11_SDK_VERSION, &swapChainDesc, &swapChain, &device, NULL, &deviceContext);
 	if (FAILED(result)) { return false; }
 
 	//get the pointer to the back buffer
@@ -208,5 +208,189 @@ bool D3DGraphics::Initialize(int screenWidth, int screenHeight, bool vSync, HWND
 	result = device->CreateDepthStencilState(&depthStencilDesc, &depthStencilState);
 	if (FAILED(result)) { return 0; }
 
+	//set the depth stencil state
+	deviceContext->OMSetDepthStencilState(depthStencilState, 1);
 
+	//init the depth stencil view
+	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+
+	//setup the depth stencil view desc
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	//create the depth stencil view
+	result = device->CreateDepthStencilView(depthStencilBuffer, &depthStencilViewDesc, &depthStencilView);
+	if (FAILED(result)) { return false; }
+
+	//bind the render target view and depth stencil buffer to the output render pipeline
+	deviceContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+
+	//setup the raster description, which will determine howo and what polygons will be drawn
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = false;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	//create the rasterizer state from the desc
+	result = device->CreateRasterizerState(&rasterDesc, &rasterState);
+	if (FAILED(result)) { return false; }
+
+	deviceContext->RSSetState(rasterState);
+
+	//setup the viewport for rendering
+	viewport.Width = (float)screenWidth;
+	viewport.Height = (float)screenHeight;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+
+	//create the viewport
+	deviceContext->RSSetViewports(1, &viewport);
+
+	//setup the projectionMatrix
+	fieldOfView = 3.141592654f / 4.0f;
+	screenAspect = (float)screenWidth / (float)screenHeight;
+
+	//create the projection matrix for 3D rendering
+	projectionMatrix = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNear, screenDepth);
+
+	//init the world matrix to the identity matrix
+	worldMatrix = XMMatrixIdentity();
+
+	//create an oethographic projection matrix for 2D rendering
+	orthoMatrix = XMMatrixOrthographicLH((float)screenWidth, (float)screenHeight, screenNear, screenDepth);
+
+	return true;
+}
+
+void D3DGraphics::Shutdown()
+{
+	//before shutting down set to windowed mode or when you releast the swap chain it will throw an exception
+	if (swapChain)
+	{
+		swapChain->SetFullscreenState(false, NULL);
+	}
+
+	if (rasterState)
+	{
+		rasterState->Release();
+		rasterState = 0;
+	}
+
+	if (depthStencilView)
+	{
+		depthStencilView->Release();
+		depthStencilView = 0;
+	}
+
+	if (depthStencilState)
+	{
+		depthStencilState->Release();
+		depthStencilState = 0;
+	}
+
+	if (depthStencilBuffer)
+	{
+		depthStencilBuffer->Release();
+		depthStencilBuffer = 0;
+	}
+
+	if (renderTargetView)
+	{
+		renderTargetView->Release();
+		renderTargetView = 0;
+	}
+
+	if (deviceContext)
+	{
+		deviceContext->Release();
+		deviceContext = 0;
+	}
+
+	if (device)
+	{
+		device->Release();
+		device = 0;
+	}
+
+	if (swapChain)
+	{
+		swapChain->Release();
+		swapChain = 0;
+	}
+
+	return;
+}
+
+void D3DGraphics::BeginScene(float red, float green, float blue, float alpha)
+{
+	float color[4];
+
+	//setup the color to clear the buffer to
+	color[0] = red;
+	color[1] = green;
+	color[2] = blue;
+	color[3] = alpha;
+
+	//clear the back buffer
+	deviceContext->ClearRenderTargetView(renderTargetView, color);
+
+	//clear the depth buffer
+	deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	return;
+}
+
+void D3DGraphics::EndScene()
+{
+	//present the back buffer to the screen since rendering is complete
+	if (vSyncEnabled)
+	{
+		//lock to screen refresh rate
+		swapChain->Present(1, 0);
+	}
+	else
+	{
+		//present as fast as possible
+		swapChain->Present(0, 0);
+	}
+
+	return;
+}
+
+ID3D11Device* D3DGraphics::GetDevice() { return device; }
+
+ID3D11DeviceContext* D3DGraphics::GetDeviceContext() { return deviceContext; }
+
+void D3DGraphics::GetProjectionMatrix(XMMATRIX& projMatrix)
+{
+	projMatrix = projectionMatrix;
+	return;
+}
+
+void D3DGraphics::GetWorldMatrix(XMMATRIX& wMatrix)
+{
+	wMatrix = worldMatrix;
+	return;
+}
+
+void D3DGraphics::GetOrthoMatrix(XMMATRIX& oMatrix)
+{
+	oMatrix = orthoMatrix;
+	return;
+}
+
+void D3DGraphics::GetVideoCardInfo(char* cardName, int& memory)
+{
+	strcpy_s(cardName, 128, videoCardDescription);
+	memory = videoCardMemory;
+	return;
 }

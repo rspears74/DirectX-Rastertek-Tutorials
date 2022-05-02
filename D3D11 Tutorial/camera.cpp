@@ -39,7 +39,7 @@ XMFLOAT3 Camera::GetPosition()
 
 XMFLOAT3 Camera::GetRotation()
 {
-	return XMFLOAT3(_rotationX, _rotationY, _rotationZ;
+	return XMFLOAT3(_rotationX, _rotationY, _rotationZ);
 }
 
 void Camera::Render()

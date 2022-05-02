@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="camera.h" />
     <ClInclude Include="colorshaders.h" />
     <ClInclude Include="d3dgraphics.h" />
     <ClInclude Include="graphics.h" />
@@ -148,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="colorshaders.cpp" />
     <ClCompile Include="d3dGraphics.cpp" />
     <ClCompile Include="graphics.cpp" />

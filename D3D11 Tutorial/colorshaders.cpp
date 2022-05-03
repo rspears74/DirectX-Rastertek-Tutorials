@@ -20,7 +20,7 @@ ColorShaders::~ColorShaders()
 
 bool ColorShaders::Initialize(ID3D11Device* device, HWND hWnd)
 {
-	bool result = InitializeShader(device, hWnd, L"../Shaders/color.vs", L"../Shaders/color.ps");
+	bool result = InitializeShader(device, hWnd, L"colorVS.hlsl", L"colorPS.hlsl");
 	if (!result) { return false; }
 
 	return true;

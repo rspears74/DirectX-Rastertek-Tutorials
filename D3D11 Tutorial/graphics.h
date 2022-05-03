@@ -3,6 +3,9 @@
 
 #include <Windows.h>
 #include "d3dgraphics.h"
+#include "camera.h"
+#include "model.h"
+#include "colorshaders.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -23,7 +26,9 @@ public:
 private:
 	bool Render();
 	D3DGraphics* _d3DGraphics;
-
+	Camera* _camera;
+	Model* _model;
+	ColorShaders* _colorShaders;
 };
 
 #endif

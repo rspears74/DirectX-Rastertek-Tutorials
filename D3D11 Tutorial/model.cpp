@@ -52,8 +52,8 @@ bool Model::InitializeBuffers(ID3D11Device* device)
 	HRESULT result;
 
 	//set the number of vertices in the vertex and index arrays
-	_vertexCount = 3;
-	_indexCount = 3;
+	_vertexCount = 6;
+	_indexCount = 6;
 
 	//create the arrays
 	vertices = new VertexType[_vertexCount];
@@ -64,15 +64,24 @@ bool Model::InitializeBuffers(ID3D11Device* device)
 
 	//load the vertex and index arrays with data
 	vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f); //bottom left
-	vertices[0].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f); //top
-	vertices[1].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	vertices[0].color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	vertices[1].position = XMFLOAT3(1.0f, 1.0f, 0.0f); //top right
+	vertices[1].color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 	vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f); //bottom right
-	vertices[2].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	vertices[2].color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	vertices[3].position = XMFLOAT3(-1.0f, -1.0f, 0.0f); //bottom left, triangle 2
+	vertices[3].color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	vertices[4].position = XMFLOAT3(-1.0f, 1.0f, 0.0f); //top left
+	vertices[4].color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	vertices[5].position = XMFLOAT3(1.0f, 1.0f, 0.0f); //top right, triangle 2
+	vertices[5].color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
 	indices[0] = 0; //bottom left
 	indices[1] = 1; //top
 	indices[2] = 2; //bottom right
+	indices[3] = 3;
+	indices[4] = 4;
+	indices[5] = 5;
 
 	//set up the description of the static vertex buffer
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;

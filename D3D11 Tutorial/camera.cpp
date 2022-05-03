@@ -82,7 +82,7 @@ void Camera::Render()
 	rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
 
 	//transform the lookAt and up vector by the rotation matrix so the view is correctly rotated at the origin
-	lookAtVector = XMVector2TransformCoord(lookAtVector, rotationMatrix);
+	lookAtVector = XMVector3TransformCoord(lookAtVector, rotationMatrix);
 	upVector = XMVector3TransformCoord(upVector, rotationMatrix);
 
 	//translate the rotated camera position to the location of the viewer
